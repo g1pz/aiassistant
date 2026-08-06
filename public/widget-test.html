@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kodu Kinnisvara — Test Page</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+      background: #f5f0eb;
+      color: #2c2c2c;
+    }
+
+    /* ── NAV ── */
+    nav {
+      background: #fff;
+      border-bottom: 1px solid #e0dbd4;
+      padding: 0 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    nav .logo {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: #1a1a1a;
+    }
+    nav .logo span { color: #c8873a; }
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 32px;
+    }
+    nav ul a {
+      text-decoration: none;
+      color: #555;
+      font-size: 14px;
+      font-family: Arial, sans-serif;
+      transition: color 0.2s;
+    }
+    nav ul a:hover { color: #c8873a; }
+    nav .nav-cta {
+      background: #c8873a;
+      color: #fff;
+      padding: 9px 22px;
+      border-radius: 4px;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    nav .nav-cta:hover { background: #b07530; }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(135deg, #1a2a1a 0%, #2d4a2d 100%);
+      color: #fff;
+      padding: 100px 40px;
+      text-align: center;
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.6rem);
+      font-weight: 700;
+      line-height: 1.15;
+      margin-bottom: 20px;
+      letter-spacing: -0.03em;
+    }
+    .hero h1 span { color: #c8d8a0; }
+    .hero p {
+      font-size: 18px;
+      color: rgba(255,255,255,0.75);
+      max-width: 540px;
+      margin: 0 auto 36px;
+      line-height: 1.6;
+      font-family: Arial, sans-serif;
+    }
+    .hero-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .btn-primary {
+      background: #c8873a;
+      color: #fff;
+      padding: 14px 32px;
+      border-radius: 4px;
+      font-family: Arial, sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .btn-primary:hover { background: #b07530; }
+    .btn-outline {
+      border: 2px solid rgba(255,255,255,0.4);
+      color: #fff;
+      padding: 12px 30px;
+      border-radius: 4px;
+      font-family: Arial, sans-serif;
+      font-size: 15px;
+      text-decoration: none;
+      transition: border-color 0.2s;
+    }
+    .btn-outline:hover { border-color: #fff; }
+
+    /* ── LISTINGS ── */
+    .section { padding: 80px 40px; max-width: 1100px; margin: 0 auto; }
+    .section-title {
+      font-size: clamp(1.4rem, 3vw, 2rem);
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+    }
+    .section-subtitle {
+      color: #777;
+      font-size: 15px;
+      font-family: Arial, sans-serif;
+      margin-bottom: 40px;
+    }
+
+    .listings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 24px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #e8e2db;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .card:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.1); transform: translateY(-3px); }
+    .card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      display: block;
+    }
+    .card-body { padding: 18px 20px 20px; }
+    .card-tag {
+      display: inline-block;
+      background: #f0ebe3;
+      color: #c8873a;
+      font-size: 11px;
+      font-family: Arial, sans-serif;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 3px 10px;
+      border-radius: 3px;
+      margin-bottom: 10px;
+    }
+    .card h3 { font-size: 16px; margin-bottom: 6px; line-height: 1.3; }
+    .card-price { color: #c8873a; font-size: 18px; font-weight: 700; margin-bottom: 10px; }
+    .card-meta {
+      color: #888;
+      font-size: 13px;
+      font-family: Arial, sans-serif;
+      display: flex;
+      gap: 12px;
+    }
+    .card-btn {
+      display: block;
+      margin-top: 14px;
+      text-align: center;
+      background: #1a2a1a;
+      color: #fff;
+      padding: 9px 0;
+      border-radius: 4px;
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .card-btn:hover { background: #2d4a2d; }
+
+    /* ── ABOUT ── */
+    .about { background: #fff; padding: 80px 40px; }
+    .about-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+    }
+    .about h2 { font-size: clamp(1.4rem, 3vw, 2rem); margin-bottom: 16px; letter-spacing: -0.02em; }
+    .about p {
+      color: #555;
+      font-size: 15px;
+      font-family: Arial, sans-serif;
+      line-height: 1.7;
+      margin-bottom: 14px;
+    }
+    .stats { display: flex; gap: 32px; margin-top: 24px; }
+    .stat-num { font-size: 32px; font-weight: 700; color: #c8873a; display: block; }
+    .stat-label { font-size: 13px; font-family: Arial, sans-serif; color: #888; }
+    .about-img {
+      background: linear-gradient(135deg, #2d4a2d, #4a7a4a);
+      border-radius: 8px;
+      height: 360px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255,255,255,0.3);
+      font-size: 48px;
+    }
+
+    /* ── CTA BANNER ── */
+    .cta-banner {
+      background: #c8873a;
+      padding: 64px 40px;
+      text-align: center;
+      color: #fff;
+    }
+    .cta-banner h2 { font-size: clamp(1.4rem, 3vw, 2.2rem); margin-bottom: 12px; }
+    .cta-banner p { font-family: Arial, sans-serif; font-size: 16px; opacity: 0.85; margin-bottom: 28px; }
+    .btn-white {
+      background: #fff;
+      color: #c8873a;
+      padding: 13px 32px;
+      border-radius: 4px;
+      font-family: Arial, sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: opacity 0.2s;
+      display: inline-block;
+    }
+    .btn-white:hover { opacity: 0.9; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: #1a1a1a;
+      color: rgba(255,255,255,0.5);
+      padding: 40px;
+      text-align: center;
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+    }
+    footer strong { color: rgba(255,255,255,0.8); }
+
+    @media (max-width: 700px) {
+      nav ul { display: none; }
+      .about-inner { grid-template-columns: 1fr; }
+      .about-img { height: 200px; }
+      .section { padding: 60px 20px; }
+      nav { padding: 0 20px; }
+      .hero { padding: 70px 20px; }
+      .about { padding: 60px 20px; }
+      .cta-banner { padding: 50px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="logo">Kodu <span>Kinnisvara</span></div>
+    <ul>
+      <li><a href="#">Listings</a></li>
+      <li><a href="#">Buy</a></li>
+      <li><a href="#">Rent</a></li>
+      <li><a href="#">About</a></li>
+      <li><a href="#">Contact</a></li>
+    </ul>
+    <a href="#" class="nav-cta">Book a viewing</a>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <h1>Find Your Perfect Home<br><span>in Tallinn</span></h1>
+    <p>Trusted real estate agency with over 10 years on the Estonian market. We speak your language — literally.</p>
+    <div class="hero-btns">
+      <a href="#listings" class="btn-primary">Browse listings</a>
+      <a href="#about" class="btn-outline">About us</a>
+    </div>
+  </section>
+
+  <!-- LISTINGS -->
+  <div id="listings">
+    <div class="section">
+      <h2 class="section-title">Current Listings</h2>
+      <p class="section-subtitle">Hand-picked properties across Tallinn's best neighbourhoods</p>
+      <div class="listings-grid">
+
+        <div class="card">
+          <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&q=80" alt="Kalamaja apartment" />
+          <div class="card-body">
+            <span class="card-tag">For sale</span>
+            <h3>2-room Apartment, Kalamaja</h3>
+            <div class="card-price">€185,000</div>
+            <div class="card-meta"><span>52 m²</span><span>3rd floor</span><span>Renovated 2022</span></div>
+            <a href="#" class="card-btn">View details</a>
+          </div>
+        </div>
+
+        <div class="card">
+          <img src="https://images.unsplash.com/photo-1598928506311-c55ded91a20c?w=400&q=80" alt="Kristiine apartment" />
+          <div class="card-body">
+            <span class="card-tag">For sale</span>
+            <h3>3-room Apartment, Kristiine</h3>
+            <div class="card-price">€245,000</div>
+            <div class="card-meta"><span>74 m²</span><span>2nd floor</span><span>Parking</span></div>
+            <a href="#" class="card-btn">View details</a>
+          </div>
+        </div>
+
+        <div class="card">
+          <img src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400&q=80" alt="Pirita house" />
+          <div class="card-body">
+            <span class="card-tag">For sale</span>
+            <h3>House with Sea View, Pirita</h3>
+            <div class="card-price">€490,000</div>
+            <div class="card-meta"><span>160 m²</span><span>800 m² land</span><span>A-class</span></div>
+            <a href="#" class="card-btn">View details</a>
+          </div>
+        </div>
+
+        <div class="card">
+          <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&q=80" alt="Lasnamäe rental" />
+          <div class="card-body">
+            <span class="card-tag">For rent</span>
+            <h3>2-room Apartment, Lasnamäe</h3>
+            <div class="card-price">€650 / month</div>
+            <div class="card-meta"><span>48 m²</span><span>5th floor</span><span>Sep 1</span></div>
+            <a href="#" class="card-btn">View details</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ABOUT -->
+  <div id="about" class="about">
+    <div class="about-inner">
+      <div>
+        <h2>10 Years of Helping People Find Home</h2>
+        <p>Kodu Kinnisvara is a boutique agency based in the heart of Tallinn. We specialise in residential and commercial properties across all major city districts.</p>
+        <p>Our team speaks Estonian, Russian, and English — and now our AI assistant can help in any language, 24/7.</p>
+        <div class="stats">
+          <div>
+            <span class="stat-num">340+</span>
+            <span class="stat-label">Deals closed</span>
+          </div>
+          <div>
+            <span class="stat-num">98%</span>
+            <span class="stat-label">Client satisfaction</span>
+          </div>
+          <div>
+            <span class="stat-num">10yr</span>
+            <span class="stat-label">On the market</span>
+          </div>
+        </div>
+      </div>
+      <div class="about-img">🏡</div>
+    </div>
+  </div>
+
+  <!-- CTA BANNER -->
+  <section class="cta-banner">
+    <h2>Ready to find your next property?</h2>
+    <p>Our agents are available Mon–Fri 9:00–18:00, Sat 10:00–14:00. Or chat with our AI assistant anytime.</p>
+    <a href="mailto:info@kodukv.ee" class="btn-white">Contact us</a>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p><strong>Kodu Kinnisvara OÜ</strong> — Narva mnt 5, Tallinn 10117 &nbsp;·&nbsp; info@kodukv.ee &nbsp;·&nbsp; +372 5XXX XXXX</p>
+    <p style="margin-top:8px">© 2025 Kodu Kinnisvara. All rights reserved.</p>
+  </footer>
+
+  <!-- AGENTIC WIDGET — вставь сюда свой домен -->
+  <script
+    src="http://localhost:3000/widget.js"
+    data-client-id="kodu-kinnisvara"
+    async>
+  </script>
+
+</body>
+</html>
