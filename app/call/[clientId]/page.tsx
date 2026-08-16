@@ -14,7 +14,7 @@ export default async function CallPage({
   const { clientId } = await params;
   const client = getClient(clientId);
 
-  if (!client || !client.vapiAssistantId) notFound();
+  if (!client) notFound();
 
   return (
     <CallInterface
@@ -23,7 +23,8 @@ export default async function CallPage({
       hostName={client.hostName ?? 'AI Assistant'}
       accent={client.theme?.accent ?? '#4F8CFF'}
       accent2={client.theme?.accent2 ?? '#A855F7'}
-      vapiAssistantId={client.vapiAssistantId}
+      vapiAssistantId={client.vapiAssistantId ?? ''}
+      welcomeMessages={client.welcomeMessages}
     />
   );
 }

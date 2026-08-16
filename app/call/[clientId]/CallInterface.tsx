@@ -69,6 +69,7 @@ interface CallInterfaceProps {
   accent: string;
   accent2: string;
   vapiAssistantId: string;
+  welcomeMessages?: Record<string, string>;
 }
 
 function formatDuration(seconds: number): string {
@@ -84,6 +85,7 @@ export function CallInterface({
   accent,
   accent2,
   vapiAssistantId,
+  welcomeMessages,
 }: CallInterfaceProps) {
   const [status, setStatus] = useState<CallStatus>('idle');
   const [error, setError] = useState<string | null>(null);
@@ -130,7 +132,24 @@ export function CallInterface({
         setError('Could not start the call. Please check microphone permissions.');
         vapiRef.current = null;
       });
-      await vapi.start(vapiAssistantId);
+
+      // Fetch server-side config: system prompt with today's date + localized greeting (no emojis)
+      const cfgRes = await fetch(`/api/vapi/session-config?clientId=${clientId}&lang=${lang}`);
+      const { systemPrompt, firstMessage } = cfgRes.ok ? await cfgRes.json() : {};
+
+      const vapiModel = process.env.NEXT_PUBLIC_VAPI_MODEL ?? 'claude-haiku-4-5-20251001';
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (vapi as any).start(vapiAssistantId, {
+        ...(firstMessage ? { firstMessage } : {}),
+        ...(systemPrompt ? {
+          model: {
+            provider: 'anthropic',
+            model: vapiModel,
+            systemPrompt,
+          },
+        } : {}),
+      });
     } catch (err) {
       console.error('[Vapi]', err);
       setStatus('idle');
