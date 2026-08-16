@@ -89,19 +89,33 @@ export function DemoSection() {
                 {/* Live demo cards */}
                 {i === 0 || i === 1 || i === 2 ? (
                   <div className="mt-auto flex flex-col gap-2">
-                    <Link
-                      href={
-                        i === 0 ? "/chat/kodu-kinnisvara"
-                        : i === 1 ? "/chat/glamour-salon"
-                        : "/chat/bella-cucina"
-                      }
-                      className="inline-flex items-center justify-center gap-2 px-5 py-3 font-medium text-sm transition-transform duration-150 ease-out cta-btn text-white rounded-full"
-                    >
-                      {i === 2 ? '🍽️ ' : ''}{t.demos.tryLiveDemo}
-                      <svg width="14" height="14" viewBox="0 0 12 12" fill="none">
-                        <path d="M2 10L10 2M10 2H4M10 2V8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    </Link>
+                    {i === 2 ? (
+                      <div className="flex gap-2">
+                        <Link
+                          href="/chat/bella-cucina"
+                          className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 font-medium text-sm cta-btn text-white rounded-full flex-1"
+                        >
+                          💬 Chat
+                        </Link>
+                        <Link
+                          href="/chat/bella-cucina"
+                          className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 font-medium text-sm text-white rounded-full flex-1 transition-colors duration-150"
+                          style={{ border: "1px solid rgba(217,119,6,0.55)", background: "rgba(217,119,6,0.1)", color: "#FBBF24" }}
+                        >
+                          📞 Voice
+                        </Link>
+                      </div>
+                    ) : (
+                      <Link
+                        href={i === 0 ? "/chat/kodu-kinnisvara" : "/chat/glamour-salon"}
+                        className="inline-flex items-center justify-center gap-2 px-5 py-3 font-medium text-sm transition-transform duration-150 ease-out cta-btn text-white rounded-full"
+                      >
+                        {t.demos.tryLiveDemo}
+                        <svg width="14" height="14" viewBox="0 0 12 12" fill="none">
+                          <path d="M2 10L10 2M10 2H4M10 2V8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </Link>
+                    )}
                     <span
                       className="flex items-center gap-1.5"
                       style={{ fontFamily: "var(--font-jetbrains-mono)", fontSize: 11, color: "#22C55E" }}
