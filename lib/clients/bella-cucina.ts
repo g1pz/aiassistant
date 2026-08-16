@@ -3,6 +3,7 @@ import type { ClientConfig } from './index';
 export const bellaCucina: ClientConfig = {
   name: 'Bella Cucina',
   clientType: 'restaurant',
+  hostName: 'Sofia',
   phone: process.env.VAPI_PHONE_NUMBER || '',
   vapiAssistantId: process.env.NEXT_PUBLIC_VAPI_ASSISTANT_ID || '',
 

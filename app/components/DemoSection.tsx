@@ -6,8 +6,52 @@ import { GlassCard } from "./ui/GlassCard";
 import { useLanguage } from "../i18n/LanguageContext";
 import { openCalendly } from "@/lib/config";
 
-const EMOJIS = ["🏢", "💅", "🍽️", "🦷"];
-const COLORS = ["#4F8CFF", "#A855F7", "#4F8CFF", "#A855F7"];
+const COLORS = ["#4F8CFF", "#A855F7", "#D97706", "#22C55E"];
+
+function IconRealEstate({ color }: { color: string }) {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M3 21h18M3 10.5L12 3l9 7.5" stroke={color} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M9 21v-6h6v6" stroke={color} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/>
+      <rect x="5" y="11" width="3" height="3" rx="0.5" stroke={color} strokeWidth="1.5"/>
+      <rect x="16" y="11" width="3" height="3" rx="0.5" stroke={color} strokeWidth="1.5"/>
+    </svg>
+  );
+}
+
+function IconBeauty({ color }: { color: string }) {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M12 2C12 2 8 6 8 10a4 4 0 008 0c0-4-4-8-4-8z" stroke={color} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M6 18c0-2.21 2.686-4 6-4s6 1.79 6 4" stroke={color} strokeWidth="1.7" strokeLinecap="round"/>
+      <path d="M3 21h18" stroke={color} strokeWidth="1.7" strokeLinecap="round"/>
+      <circle cx="12" cy="10" r="1.5" fill={color}/>
+    </svg>
+  );
+}
+
+function IconRestaurant({ color }: { color: string }) {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M3 11h18M12 4v7" stroke={color} strokeWidth="1.7" strokeLinecap="round"/>
+      <path d="M5 11C5 7.686 8.134 5 12 5s7 2.686 7 6" stroke={color} strokeWidth="1.7" strokeLinecap="round"/>
+      <path d="M3 11a1 1 0 001 1h16a1 1 0 001-1" stroke={color} strokeWidth="1.7" strokeLinecap="round"/>
+      <path d="M8 19h8M12 13v6" stroke={color} strokeWidth="1.7" strokeLinecap="round"/>
+      <path d="M7 21h10" stroke={color} strokeWidth="1.7" strokeLinecap="round"/>
+    </svg>
+  );
+}
+
+function IconDental({ color }: { color: string }) {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M12 2C9.5 2 7 4 7 7c0 1.5.5 3 1 4.5C8.5 13 9 15 9 17c0 2 .5 3 1.5 3s1.5-1.5 1.5-3 .5-3 1.5-3 1.5 1.5 1.5 3-.5 3 1.5 3 1.5-1 1.5-3c0-2 .5-4 1-5.5.5-1.5 1-3 1-4.5 0-3-2.5-5-5-5z" stroke={color} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M9 8.5c1-.5 2-.5 3 0s2 .5 3 0" stroke={color} strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  );
+}
+
+const ICONS = [IconRealEstate, IconBeauty, IconRestaurant, IconDental];
 
 const item = {
   hidden: { opacity: 0, y: 24 },
@@ -65,10 +109,10 @@ export function DemoSection() {
             <motion.div key={i} variants={item} className="h-full">
               <GlassCard className="p-6 rounded-2xl flex flex-col gap-4 h-full">
                 <div
-                  className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl"
+                  className="w-12 h-12 rounded-xl flex items-center justify-center"
                   style={{ background: `${COLORS[i]}18`, border: `1px solid ${COLORS[i]}30` }}
                 >
-                  {EMOJIS[i]}
+                  {(() => { const Icon = ICONS[i]; return <Icon color={COLORS[i]} />; })()}
                 </div>
 
                 <h3
@@ -95,14 +139,14 @@ export function DemoSection() {
                           href="/chat/bella-cucina"
                           className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 font-medium text-sm cta-btn text-white rounded-full flex-1"
                         >
-                          💬 Chat
+                          💬 {t.demos.chatBtn}
                         </Link>
                         <Link
-                          href="/chat/bella-cucina"
+                          href="/call/bella-cucina"
                           className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 font-medium text-sm text-white rounded-full flex-1 transition-colors duration-150"
                           style={{ border: "1px solid rgba(217,119,6,0.55)", background: "rgba(217,119,6,0.1)", color: "#FBBF24" }}
                         >
-                          📞 Voice
+                          📞 {t.demos.voiceBtn}
                         </Link>
                       </div>
                     ) : (

@@ -5,7 +5,7 @@ import { GlassCard } from "./ui/GlassCard";
 import { AnimatedCounter } from "./ui/AnimatedCounter";
 import { useLanguage } from "../i18n/LanguageContext";
 
-const STAT_VALUES = [73, 3, 60];
+const STAT_VALUES = [73, 10, 60];
 const COLORS = ["#4F8CFF", "#A855F7", "#4F8CFF"];
 
 const item = {

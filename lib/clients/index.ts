@@ -53,6 +53,7 @@ export type ClientConfig = {
   phone?: string;
   clientType?: 'restaurant' | 'default';
   vapiAssistantId?: string;
+  hostName?: string;
 };
 
 const clients: Record<string, ClientConfig> = {

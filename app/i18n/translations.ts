@@ -46,6 +46,8 @@ export interface T {
     tryLiveDemo: string;
     getDemo: string;
     liveBadge: string;
+    chatBtn: string;
+    voiceBtn: string;
   };
   cta: {
     badge: string;
@@ -153,6 +155,8 @@ export const translations: Record<Locale, T> = {
       tryLiveDemo: "Try live demo",
       getDemo: "Get free demo",
       liveBadge: "Live",
+      chatBtn: "Chat",
+      voiceBtn: "Voice",
     },
     cta: {
       badge: "Ready to start?",
@@ -164,7 +168,7 @@ export const translations: Record<Locale, T> = {
       badges: ["Live in 3–5 days", "No code required", "Works in any language"],
     },
     footer: {
-      tagline: "AI agents for local businesses in Estonia",
+      tagline: "AI agents for local businesses",
       getInTouch: "Get in touch",
       rights: "All rights reserved.",
       location: "Tallinn, Estonia",
@@ -258,8 +262,10 @@ export const translations: Record<Locale, T> = {
       comingSoon: "Демо скоро появится",
       tryDemo: "Попробовать демо",
       tryLiveDemo: "Живое демо",
-      getDemo: "Get free demo",
+      getDemo: "Бесплатное демо",
       liveBadge: "Live",
+      chatBtn: "Чат",
+      voiceBtn: "Звонок",
     },
     cta: {
       badge: "Готовы начать?",
@@ -271,7 +277,7 @@ export const translations: Record<Locale, T> = {
       badges: ["Запуск за 3–5 дней", "Без программирования", "Работает на любом языке"],
     },
     footer: {
-      tagline: "ИИ-агенты для малого бизнеса в Эстонии",
+      tagline: "ИИ-агенты для малого бизнеса",
       getInTouch: "Связаться",
       rights: "Все права защищены.",
       location: "Таллинн, Эстония",
@@ -365,8 +371,10 @@ export const translations: Record<Locale, T> = {
       comingSoon: "Demo tulekul",
       tryDemo: "Proovi demot",
       tryLiveDemo: "Proovi live-demot",
-      getDemo: "Get free demo",
+      getDemo: "Tasuta demo",
       liveBadge: "Live",
+      chatBtn: "Vestlus",
+      voiceBtn: "Kõne",
     },
     cta: {
       badge: "Valmis alustama?",
@@ -378,7 +386,7 @@ export const translations: Record<Locale, T> = {
       badges: ["Töötab 3–5 päevaga", "Koodi pole vaja", "Töötab igas keeles"],
     },
     footer: {
-      tagline: "AI-agendid kohalikele ettevõtetele Eestis",
+      tagline: "AI-agendid kohalikele ettevõtetele",
       getInTouch: "Võtke ühendust",
       rights: "Kõik õigused kaitstud.",
       location: "Tallinn, Eesti",
