@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { MagneticButton } from './ui/MagneticButton';
 import { useLanguage } from '../i18n/LanguageContext';
@@ -9,6 +10,13 @@ const ease = 'easeOut' as const;
 
 export function Hero() {
   const { t } = useLanguage();
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 80);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   return (
     <section className="relative min-h-[640px] flex items-center justify-center overflow-hidden pt-24">
@@ -108,12 +116,13 @@ export function Hero() {
         </motion.div>
       </div>
 
+      {/* Scroll indicator — fixed to viewport bottom, fades out on scroll */}
       <motion.div
         initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.2, duration: 0.6 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
-        style={{ color: '#94A3B8' }}
+        animate={{ opacity: scrolled ? 0 : 1 }}
+        transition={{ delay: scrolled ? 0 : 1.2, duration: 0.5 }}
+        className="fixed bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 pointer-events-none"
+        style={{ color: '#94A3B8', zIndex: 20 }}
       >
         <span
           style={{

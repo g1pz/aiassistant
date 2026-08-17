@@ -61,6 +61,7 @@ export function CustomCursor() {
         ring.style.width = `${rect.width + pad}px`;
         ring.style.height = `${rect.height + pad}px`;
         ring.style.borderRadius = cachedBR;
+        ring.style.opacity = '1';
         ring.style.borderColor = 'rgba(79,140,255,0.60)';
         ring.style.background = 'rgba(79,140,255,0.058)';
         ring.style.boxShadow =
@@ -68,18 +69,16 @@ export function CustomCursor() {
         dot.style.opacity = '0';
         dot.style.transform = 'translate(-50%,-50%) scale(0.3)';
       } else {
-        // Default: follow mouse with gentle lag
-        ringX += (mouseX - ringX) * 0.13;
-        ringY += (mouseY - ringY) * 0.13;
-
+        // Default: ring is invisible — cursor feedback comes from the network background
+        ring.style.opacity = '0';
         ring.style.width = '32px';
         ring.style.height = '32px';
         ring.style.borderRadius = '50%';
-        ring.style.borderColor = 'rgba(79,140,255,0.55)';
-        ring.style.background = 'transparent';
-        ring.style.boxShadow = 'none';
         dot.style.opacity = '1';
         dot.style.transform = 'translate(-50%,-50%) scale(1)';
+        // Keep position tracking so hover snap is instant when entering a target
+        ringX += (mouseX - ringX) * 0.35;
+        ringY += (mouseY - ringY) * 0.35;
       }
 
       ring.style.left = `${ringX}px`;

@@ -2,32 +2,86 @@
 
 import { useEffect, useRef } from 'react';
 
-const MAX_DIST = 155;
-const BLUE_H = 216;
-const PURPLE_H = 270;
-const RED_H = 5;
+const TAU = Math.PI * 2;
+const MAX_EDGE_DIST = 170;
+const MAX_IMPULSES = 3;
+const EXTRA_H = 1400;  // virtual canvas extends below viewport for parallax travel
+const PARALLAX = 0.32; // network moves at 32% of scroll speed → depth illusion
 
-interface Node {
-  x: number; y: number;
-  vx: number; vy: number;
-  r: number;
-  phase: number;
-  act: number;
-  targetAct: number;
-  hue: number;
-  stressed: boolean;
+interface NNode {
+  x: number;
+  y: number;
+  baseR: number;
+  baseAlpha: number;
+  bright: number;  // cursor proximity boost [0,1]
+  flash: number;   // impulse-arrival flash [0,1], decays per frame
+  rgb: readonly [number, number, number];
 }
 
-interface Packet {
-  a: number; b: number;
+interface Impulse {
+  ai: number;
+  bi: number;
   t: number;
-  speed: number;
-  hue: number;
-  life: number;
+  dur: number;
+  rgb: readonly [number, number, number];
 }
 
-function lerp(a: number, b: number, t: number): number {
-  return a + (b - a) * Math.max(0, Math.min(1, t));
+const BLUE = [79, 140, 255] as const;
+const PURPLE = [168, 85, 247] as const;
+
+// Quasi-regular grid with jitter — looks like a network, not random clouds
+function buildNodes(w: number, virtualH: number, isMobile: boolean): NNode[] {
+  const step = isMobile ? 90 : 120;
+  const jitter = step * 0.38;
+  const nodes: NNode[] = [];
+
+  for (let gy = step * 0.5; gy < virtualH + step * 0.5; gy += step) {
+    for (let gx = step * 0.5; gx < w + step * 0.5; gx += step) {
+      const x = gx + (Math.random() - 0.5) * jitter * 2;
+      const y = gy + (Math.random() - 0.5) * jitter * 2;
+      nodes.push({
+        x, y,
+        baseR: 1.4 + Math.random() * 1.0,
+        baseAlpha: 0.24 + Math.random() * 0.16,
+        bright: 0,
+        flash: 0,
+        rgb: Math.random() < 0.55 ? BLUE : PURPLE,
+      });
+    }
+  }
+  return nodes;
+}
+
+// Build edge list once at init — O(n²) is fine for ~200 nodes
+function buildEdges(nodes: NNode[]): Array<[number, number]> {
+  const edges: Array<[number, number]> = [];
+  const connected = new Set<string>();
+
+  for (let i = 0; i < nodes.length; i++) {
+    const a = nodes[i];
+    const nearby: Array<{ j: number; d: number }> = [];
+
+    for (let j = 0; j < nodes.length; j++) {
+      if (i === j) continue;
+      const d = Math.hypot(a.x - nodes[j].x, a.y - nodes[j].y);
+      if (d < MAX_EDGE_DIST) nearby.push({ j, d });
+    }
+
+    nearby.sort((a, b) => a.d - b.d);
+    const maxConn = 2 + Math.floor(Math.random() * 3); // 2–4 connections per node
+    let count = 0;
+
+    for (const n of nearby) {
+      if (count >= maxConn) break;
+      const key = i < n.j ? `${i}-${n.j}` : `${n.j}-${i}`;
+      if (!connected.has(key)) {
+        connected.add(key);
+        edges.push([i, n.j]);
+        count++;
+      }
+    }
+  }
+  return edges;
 }
 
 export function AIBackground() {
@@ -41,27 +95,14 @@ export function AIBackground() {
 
     let w = 0, h = 0;
     let animId = 0;
-    let sec = 0;
-    let time = 0;
     let lastTs = 0;
-    let lastPacketTime = 0;
-
-    const mouse = { x: -1000, y: -1000 };
-    let nodes: Node[] = [];
-    let packets: Packet[] = [];
-
-    function getPhase(scrollY: number): { section: number } {
-      const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
-      const pct = Math.min(1, scrollY / maxScroll);
-      // [Hero, Problem, HowItWorks, Differentiator, Demos, CTA]
-      const bps = [0, 0.17, 0.33, 0.50, 0.67, 0.84, 1.0];
-      for (let s = 0; s < bps.length - 1; s++) {
-        if (pct < bps[s + 1] || s === bps.length - 2) {
-          return { section: s };
-        }
-      }
-      return { section: 5 };
-    }
+    let nodes: NNode[] = [];
+    let edges: Array<[number, number]> = [];
+    let impulses: Impulse[] = [];
+    let nextImpulseIn = 2.0;
+    let isMobile = false;
+    let smoothScroll = 0; // lerped scroll position for smooth parallax
+    const mouse = { x: -9999, y: -9999 };
 
     function init() {
       if (!canvas) return;
@@ -69,263 +110,208 @@ export function AIBackground() {
       h = window.innerHeight;
       canvas.width = w;
       canvas.height = h;
-
-      const count = w < 768 ? 42 : 68;
-      nodes = Array.from({ length: count }, () => ({
-        x: Math.random() * w,
-        y: Math.random() * h,
-        vx: (Math.random() - 0.5) * 0.4,
-        vy: (Math.random() - 0.5) * 0.4,
-        r: Math.random() * 1.5 + 1.2,
-        phase: Math.random() * Math.PI * 2,
-        act: 0.2,
-        targetAct: 0.3,
-        hue: Math.random() < 0.6 ? BLUE_H : PURPLE_H,
-        stressed: false,
-      }));
-      packets = [];
+      isMobile = w < 768;
+      nodes = buildNodes(w, h + EXTRA_H, isMobile);
+      edges = buildEdges(nodes);
+      impulses = [];
+      nextImpulseIn = 1.5 + Math.random() * 1.5;
+      smoothScroll = window.scrollY;
     }
 
-    function tryAddPacket() {
-      if (packets.length > 38) return;
-      for (let tries = 0; tries < 15; tries++) {
-        const ai = Math.floor(Math.random() * nodes.length);
-        const bi = Math.floor(Math.random() * nodes.length);
-        if (ai === bi) continue;
-        const na = nodes[ai], nb = nodes[bi];
-        if (Math.hypot(na.x - nb.x, na.y - nb.y) < MAX_DIST) {
-          packets.push({
-            a: ai, b: bi, t: 0,
-            speed: 0.005 + Math.random() * 0.01,
-            hue: sec === 1
-              ? (Math.random() < 0.3 ? RED_H : BLUE_H)
-              : sec >= 3
-              ? (Math.random() < 0.5 ? PURPLE_H : BLUE_H)
-              : BLUE_H,
-            life: 1,
-          });
-          break;
+    function spawnImpulse() {
+      if (impulses.length >= MAX_IMPULSES || edges.length === 0) return;
+
+      let ai: number, bi: number;
+
+      // 35% chance: spawn impulse from node near cursor
+      if (mouse.x > -100 && Math.random() < 0.35) {
+        const yOff = smoothScroll * PARALLAX;
+        const nearby = nodes
+          .map((n, i) => ({ i, d: Math.hypot(n.x - mouse.x, n.y - (mouse.y + yOff)) }))
+          .filter(n => n.d < 200)
+          .sort((a, b) => a.d - b.d);
+
+        if (nearby.length > 0) {
+          const src = nearby[0].i;
+          const srcEdges = edges.filter(([a, b]) => a === src || b === src);
+          if (srcEdges.length > 0) {
+            [ai, bi] = srcEdges[Math.floor(Math.random() * srcEdges.length)];
+          } else {
+            [ai, bi] = edges[Math.floor(Math.random() * edges.length)];
+          }
+        } else {
+          [ai, bi] = edges[Math.floor(Math.random() * edges.length)];
         }
-      }
-    }
-
-    function updateNodes() {
-      const mx = mouse.x, my = mouse.y;
-      const count = nodes.length;
-
-      for (let i = 0; i < count; i++) {
-        const n = nodes[i];
-
-        switch (sec) {
-          case 0: {
-            // Hero: gentle awakening wave radiating from center
-            const dist = Math.hypot(n.x - w / 2, n.y - h / 2) / (Math.hypot(w, h) * 0.5);
-            n.targetAct = 0.18 + 0.38 * Math.max(0, Math.sin(time * 0.55 - dist * 2.5 + n.phase));
-            n.hue = lerp(n.hue, BLUE_H, 0.04);
-            n.stressed = false;
-            break;
-          }
-          case 1: {
-            // Problem: stressed nodes flash red, others go dim
-            if (Math.random() < 0.0008 && !n.stressed) {
-              n.stressed = Math.random() < 0.3;
-            }
-            n.hue = n.stressed ? lerp(n.hue, RED_H, 0.05) : lerp(n.hue, BLUE_H, 0.02);
-            n.targetAct = n.stressed
-              ? 0.1 + 0.75 * Math.abs(Math.sin(time * 4.5 + n.phase))
-              : 0.08 + 0.14 * Math.max(0, Math.sin(time * 0.25 + n.phase));
-            // Extra chaos
-            n.vx += (Math.random() - 0.5) * 0.06;
-            n.vy += (Math.random() - 0.5) * 0.06;
-            break;
-          }
-          case 2: {
-            // HowItWorks: left-to-right activation wave (3 sequential pulses)
-            const wavePos = ((time * 0.11) % 1.4) - 0.2;
-            const nx = n.x / w;
-            const infl = Math.exp(-Math.pow((nx - wavePos) * 5.5, 2));
-            n.targetAct = 0.1 + 0.78 * infl;
-            n.hue = lerp(n.hue, BLUE_H, 0.05);
-            n.stressed = false;
-            n.vx += 0.014; // gentle rightward drift
-            break;
-          }
-          case 3: {
-            // Differentiator: left half blue vs right half purple
-            n.hue = lerp(n.hue, n.x < w * 0.5 ? BLUE_H : PURPLE_H, 0.05);
-            n.targetAct = 0.38 + 0.42 * Math.sin(time * 0.9 + n.phase);
-            n.stressed = false;
-            break;
-          }
-          case 4: {
-            // Demos: 4 cluster hotspots light up in sequence
-            const clusters: [number, number][] = [[0.22, 0.3], [0.78, 0.25], [0.18, 0.72], [0.77, 0.68]];
-            let maxInfl = 0, bestH = BLUE_H;
-            for (let c = 0; c < clusters.length; c++) {
-              const d = Math.hypot(n.x / w - clusters[c][0], n.y / h - clusters[c][1]);
-              const inf = Math.exp(-d * 9);
-              if (inf > maxInfl) { maxInfl = inf; bestH = c % 2 === 0 ? BLUE_H : PURPLE_H; }
-            }
-            n.hue = lerp(n.hue, bestH, 0.05);
-            n.targetAct = 0.15 + 0.74 * maxInfl + 0.11 * Math.sin(time + n.phase);
-            n.stressed = false;
-            break;
-          }
-          case 5: {
-            // CTA: synchronized pulse, all nodes converge toward center
-            const pulse = 0.5 + 0.5 * Math.sin(time * 1.8);
-            const cx = w / 2, cy = h / 2;
-            const dist = Math.hypot(n.x - cx, n.y - cy) / Math.max(w, h);
-            n.targetAct = (0.5 + 0.38 * (1 - Math.min(1, dist * 1.3))) * (0.6 + 0.4 * pulse);
-            n.hue = lerp(n.hue, lerp(BLUE_H, PURPLE_H, n.x / w), 0.05);
-            n.stressed = false;
-            n.vx += (cx - n.x) * 0.00011;
-            n.vy += (cy - n.y) * 0.00011;
-            break;
-          }
-        }
-
-        n.act = lerp(n.act, n.targetAct, 0.025);
-
-        // Mouse repulsion
-        const mdx = n.x - mx, mdy = n.y - my;
-        const mdist = Math.hypot(mdx, mdy);
-        if (mdist < 110 && mdist > 0) {
-          const f = ((110 - mdist) / 110) * 0.55;
-          n.vx += (mdx / mdist) * f;
-          n.vy += (mdy / mdist) * f;
-        }
-
-        n.vx *= 0.97;
-        n.vy *= 0.97;
-        const spd = Math.hypot(n.vx, n.vy);
-        if (spd > 1.2) { n.vx = n.vx / spd * 1.2; n.vy = n.vy / spd * 1.2; }
-
-        n.x += n.vx;
-        n.y += n.vy;
-
-        if (n.x < -10) n.x += w + 10;
-        else if (n.x > w + 10) n.x -= w + 10;
-        if (n.y < -10) n.y += h + 10;
-        else if (n.y > h + 10) n.y -= h + 10;
-      }
-    }
-
-    function draw() {
-      if (!ctx) return;
-      ctx.clearRect(0, 0, w, h);
-      const baseAlpha = [0.14, 0.11, 0.18, 0.20, 0.22, 0.23][sec] ?? 0.14;
-      const count = nodes.length;
-
-      // Connections
-      for (let i = 0; i < count; i++) {
-        for (let j = i + 1; j < count; j++) {
-          const na = nodes[i], nb = nodes[j];
-          const dx = na.x - nb.x, dy = na.y - nb.y;
-          const dist = Math.hypot(dx, dy);
-          if (dist >= MAX_DIST) continue;
-
-          const proximity = 1 - dist / MAX_DIST;
-          const alpha = proximity * Math.min(na.act, nb.act) * baseAlpha * 6.5;
-          if (alpha < 0.004) continue;
-
-          const midH = (na.hue + nb.hue) / 2;
-          ctx.beginPath();
-          ctx.moveTo(na.x, na.y);
-          ctx.lineTo(nb.x, nb.y);
-          ctx.strokeStyle = `hsla(${midH | 0},75%,65%,${alpha})`;
-          ctx.lineWidth = proximity * 1.1;
-          ctx.stroke();
+      } else {
+        // Pick a random edge that's currently visible in viewport
+        const yOff = smoothScroll * PARALLAX;
+        const visibleEdges = edges.filter(([a, b]) => {
+          const ay = nodes[a].y - yOff, by = nodes[b].y - yOff;
+          return (ay > -50 && ay < h + 50) || (by > -50 && by < h + 50);
+        });
+        if (visibleEdges.length > 0) {
+          [ai, bi] = visibleEdges[Math.floor(Math.random() * visibleEdges.length)];
+        } else {
+          [ai, bi] = edges[Math.floor(Math.random() * edges.length)];
         }
       }
 
-      // Packets
-      for (const p of packets) {
-        const na = nodes[p.a], nb = nodes[p.b];
-        if (!na || !nb) continue;
-        if (Math.hypot(na.x - nb.x, na.y - nb.y) >= MAX_DIST) continue;
-
-        const x = lerp(na.x, nb.x, p.t);
-        const y = lerp(na.y, nb.y, p.t);
-
-        ctx.beginPath();
-        ctx.arc(x, y, 5, 0, Math.PI * 2);
-        ctx.fillStyle = `hsla(${p.hue},90%,70%,${0.14 * p.life})`;
-        ctx.fill();
-
-        ctx.beginPath();
-        ctx.arc(x, y, 2, 0, Math.PI * 2);
-        ctx.fillStyle = `hsla(${p.hue},90%,78%,${0.85 * p.life})`;
-        ctx.fill();
-      }
-
-      // Nodes
-      for (const n of nodes) {
-        if (n.act < 0.05) continue;
-        const r = n.r * (1 + 0.12 * Math.sin(time * 2.5 + n.phase) * n.act);
-
-        const grd = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, r * 5);
-        grd.addColorStop(0, `hsla(${n.hue | 0},85%,68%,${n.act * baseAlpha * 12})`);
-        grd.addColorStop(1, 'hsla(0,0%,0%,0)');
-        ctx.beginPath();
-        ctx.arc(n.x, n.y, r * 5, 0, Math.PI * 2);
-        ctx.fillStyle = grd;
-        ctx.fill();
-
-        ctx.beginPath();
-        ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
-        ctx.fillStyle = `hsla(${n.hue | 0},85%,75%,${n.act * 0.88})`;
-        ctx.fill();
-      }
+      impulses.push({
+        ai: ai!,
+        bi: bi!,
+        t: 0,
+        dur: 0.6 + Math.random() * 0.4,
+        rgb: Math.random() < 0.5 ? BLUE : PURPLE,
+      });
     }
 
     function frame(ts: number) {
+      if (!canvas || !ctx) { animId = requestAnimationFrame(frame); return; }
       if (!lastTs) lastTs = ts;
-      time += Math.min(ts - lastTs, 50) * 0.001;
+      const dt = Math.min((ts - lastTs) * 0.001, 0.05);
       lastTs = ts;
 
-      sec = getPhase(window.scrollY).section;
+      // Smooth parallax scroll (lerp toward actual scrollY)
+      smoothScroll += (window.scrollY - smoothScroll) * 0.07;
+      const yOff = smoothScroll * PARALLAX;
 
-      const rates = [850, 1300, 220, 170, 130, 380];
-      if (ts - lastPacketTime > (rates[sec] ?? 600)) {
-        tryAddPacket();
-        lastPacketTime = ts;
+      // ── Impulse timer (skip on mobile) ────────────────────────────────────
+      if (!isMobile) {
+        nextImpulseIn -= dt;
+        if (nextImpulseIn <= 0) {
+          spawnImpulse();
+          nextImpulseIn = 2 + Math.random() * 2;
+        }
+        impulses = impulses.filter(imp => {
+          imp.t += dt / imp.dur;
+          if (imp.t > 0.88 && imp.t - dt / imp.dur < 0.88) {
+            nodes[imp.bi].flash = Math.min(1, nodes[imp.bi].flash + 0.7);
+          }
+          return imp.t < 1.08;
+        });
       }
 
-      packets = packets.filter(p => {
-        p.t += p.speed;
-        if (p.t > 0.75) p.life = lerp(p.life, 0, 0.12);
-        return p.t < 1.05 && p.life > 0.02;
-      });
+      // ── Cursor proximity brightening ──────────────────────────────────────
+      // Cursor y in virtual canvas space = mouseY + parallax offset
+      const CURSOR_R = 180;
+      const mouseVY = mouse.y + yOff;
+      for (const node of nodes) {
+        const d = Math.hypot(node.x - mouse.x, node.y - mouseVY);
+        const target = d < CURSOR_R ? Math.pow(1 - d / CURSOR_R, 1.6) : 0;
+        node.bright += (target - node.bright) * 0.09;
+        node.flash = Math.max(0, node.flash - dt * 1.8);
+      }
 
-      updateNodes();
-      draw();
+      // ── Clear ─────────────────────────────────────────────────────────────
+      ctx.clearRect(0, 0, w, h);
+
+      // ── Parallax transform: shift entire network by -yOff ─────────────────
+      ctx.save();
+      ctx.translate(0, -yOff);
+
+      // ── Edges ─────────────────────────────────────────────────────────────
+      for (const [ai, bi] of edges) {
+        const a = nodes[ai], b = nodes[bi];
+        // Cull edges completely outside viewport (in virtual space)
+        if (
+          a.y - yOff > h + 60 && b.y - yOff > h + 60 &&
+          a.y - yOff < -60    && b.y - yOff < -60
+        ) continue;
+
+        const dist = Math.hypot(a.x - b.x, a.y - b.y);
+        const proximity = 1 - dist / MAX_EDGE_DIST;
+        const boost = (a.bright + b.bright) * 0.5;
+        const fboost = (a.flash + b.flash) * 0.5;
+        const alpha = Math.min(
+          (0.08 + 0.06 * proximity) * (1 + boost * 2.8 + fboost * 1.5),
+          0.38
+        );
+        if (alpha < 0.005) continue;
+
+        const r = (a.rgb[0] + b.rgb[0]) >> 1;
+        const g = (a.rgb[1] + b.rgb[1]) >> 1;
+        const bv = (a.rgb[2] + b.rgb[2]) >> 1;
+
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+        ctx.strokeStyle = `rgba(${r},${g},${bv},${alpha.toFixed(3)})`;
+        ctx.lineWidth = 0.75;
+        ctx.stroke();
+      }
+
+      // ── Impulses ──────────────────────────────────────────────────────────
+      for (const imp of impulses) {
+        const a = nodes[imp.ai], b = nodes[imp.bi];
+        const t = Math.min(1, imp.t);
+        const fade = t < 0.75 ? 1 : 1 - (t - 0.75) / 0.33;
+        const x = a.x + (b.x - a.x) * t;
+        const y = a.y + (b.y - a.y) * t;
+
+        const glow = ctx.createRadialGradient(x, y, 0, x, y, 18);
+        glow.addColorStop(0, `rgba(${imp.rgb.join(',')},${(0.45 * fade).toFixed(3)})`);
+        glow.addColorStop(1, `rgba(${imp.rgb.join(',')},0)`);
+        ctx.beginPath(); ctx.arc(x, y, 18, 0, TAU);
+        ctx.fillStyle = glow; ctx.fill();
+
+        ctx.beginPath(); ctx.arc(x, y, 2.5, 0, TAU);
+        ctx.fillStyle = `rgba(255,255,255,${(0.88 * fade).toFixed(3)})`;
+        ctx.fill();
+      }
+
+      // ── Nodes ─────────────────────────────────────────────────────────────
+      for (const node of nodes) {
+        // Cull nodes outside viewport
+        const screenY = node.y - yOff;
+        if (screenY < -40 || screenY > h + 40) continue;
+
+        const boost = node.bright + node.flash * 0.6;
+        const r = node.baseR * (1 + boost * 1.4);
+        const alpha = Math.min(node.baseAlpha + boost * 0.45, 0.9);
+        if (alpha < 0.01) continue;
+
+        if (boost > 0.06) {
+          const glow = ctx.createRadialGradient(node.x, node.y, 0, node.x, node.y, r * 7);
+          glow.addColorStop(0, `rgba(${node.rgb.join(',')},${(alpha * 0.38).toFixed(3)})`);
+          glow.addColorStop(1, `rgba(${node.rgb.join(',')},0)`);
+          ctx.beginPath(); ctx.arc(node.x, node.y, r * 7, 0, TAU);
+          ctx.fillStyle = glow; ctx.fill();
+        }
+
+        ctx.beginPath(); ctx.arc(node.x, node.y, r, 0, TAU);
+        ctx.fillStyle = `rgba(${node.rgb.join(',')},${alpha.toFixed(3)})`;
+        ctx.fill();
+      }
+
+      ctx.restore(); // end parallax transform
+
+      // ── Vignette — fixed to viewport, no parallax ─────────────────────────
+      const cx = w / 2, cy = h / 2;
+      const vg = ctx.createRadialGradient(cx, cy, Math.min(w, h) * 0.22, cx, cy, Math.max(w, h) * 0.80);
+      vg.addColorStop(0, 'rgba(10,14,23,0)');
+      vg.addColorStop(1, 'rgba(10,14,23,0.75)');
+      ctx.fillStyle = vg;
+      ctx.fillRect(0, 0, w, h);
+
       animId = requestAnimationFrame(frame);
     }
 
     init();
     animId = requestAnimationFrame(frame);
 
-    function onResize() {
-      if (!canvas) return;
-      w = window.innerWidth;
-      h = window.innerHeight;
-      canvas.width = w;
-      canvas.height = h;
-    }
-
     const onMouse = (e: MouseEvent) => { mouse.x = e.clientX; mouse.y = e.clientY; };
-    const onLeave = () => { mouse.x = -1000; mouse.y = -1000; };
+    const onLeave = () => { mouse.x = -9999; mouse.y = -9999; };
+    const onResize = () => { init(); };
 
-    window.addEventListener('resize', onResize, { passive: true });
     window.addEventListener('mousemove', onMouse, { passive: true });
     document.addEventListener('mouseleave', onLeave);
+    window.addEventListener('resize', onResize, { passive: true });
 
     return () => {
       cancelAnimationFrame(animId);
-      window.removeEventListener('resize', onResize);
       window.removeEventListener('mousemove', onMouse);
       document.removeEventListener('mouseleave', onLeave);
+      window.removeEventListener('resize', onResize);
     };
   }, []);
 
