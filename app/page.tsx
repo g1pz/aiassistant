@@ -6,12 +6,12 @@ import { Differentiator } from "./components/Differentiator";
 import { DemoSection } from "./components/DemoSection";
 import { CTASection } from "./components/CTASection";
 import { Footer } from "./components/Footer";
-import { CosmicBackground } from "./components/CosmicBackground";
+import { AIBackground } from "./components/AIBackground";
 
 export default function Home() {
   return (
     <>
-      <CosmicBackground />
+      <AIBackground />
       <div className="relative z-10">
         <Navbar />
         <main>

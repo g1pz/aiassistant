@@ -11,7 +11,7 @@ export function Hero() {
   const { t } = useLanguage();
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-24">
+    <section className="relative min-h-[640px] flex items-center justify-center overflow-hidden pt-24">
       {/* Ambient glow */}
       <div
         className="pointer-events-none absolute inset-0"

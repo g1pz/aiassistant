@@ -330,16 +330,31 @@ export function AIBackground() {
   }, []);
 
   return (
-    <canvas
-      ref={canvasRef}
-      style={{
-        position: 'fixed',
-        inset: 0,
-        width: '100%',
-        height: '100%',
-        pointerEvents: 'none',
-        zIndex: 0,
-      }}
-    />
+    <>
+      <canvas
+        ref={canvasRef}
+        style={{
+          position: 'fixed',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          pointerEvents: 'none',
+          zIndex: 0,
+        }}
+      />
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'fixed',
+          inset: 0,
+          pointerEvents: 'none',
+          zIndex: 1,
+          backgroundImage: 'radial-gradient(rgba(255,255,255,0.025) 1px, transparent 1px)',
+          backgroundSize: '38px 38px',
+          WebkitMaskImage: 'radial-gradient(ellipse 88% 88% at 50% 50%, black 20%, transparent 100%)',
+          maskImage: 'radial-gradient(ellipse 88% 88% at 50% 50%, black 20%, transparent 100%)',
+        }}
+      />
+    </>
   );
 }
