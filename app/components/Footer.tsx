@@ -22,11 +22,11 @@ export function Footer() {
         <div className="flex flex-col gap-2">
           <a
             href="/"
-            className="font-bold text-lg tracking-tight"
+            className="flex items-center gap-2 font-bold text-lg tracking-tight"
             style={{ fontFamily: "var(--font-space-grotesk)", color: "#F5F7FA" }}
           >
-            AGENTIC
-            <span className="ml-1 inline-block w-1.5 h-1.5 rounded-full align-middle mb-0.5" style={{ background: "#4F8CFF" }} />
+            <img src="/logo32.png" alt="Vorvex" width={20} height={20} />
+            VORVEX
           </a>
           <p className="text-sm" style={{ color: "#94A3B8" }}>{t.footer.tagline}</p>
         </div>
@@ -39,24 +39,22 @@ export function Footer() {
             {t.footer.getInTouch}
           </p>
           <a
-            href="mailto:hello@agentic.ee"
+            href="mailto:vorvex.tech@gmail.com"
             className="text-sm transition-colors duration-200"
             style={{ color: "#94A3B8" }}
             onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "#4F8CFF")}
             onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "#94A3B8")}
           >
-            hello@agentic.ee
+            vorvex.tech@gmail.com
           </a>
           <a
-            href="https://t.me/agentic_ee"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="tel:+37256969240"
             className="text-sm transition-colors duration-200"
             style={{ color: "#94A3B8" }}
             onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "#4F8CFF")}
             onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "#94A3B8")}
           >
-            Telegram: @agentic_ee
+            +372 569 69240
           </a>
         </div>
 
@@ -84,7 +82,7 @@ export function Footer() {
           className="text-xs"
           style={{ fontFamily: "var(--font-jetbrains-mono)", color: "rgba(148,163,184,0.5)", fontSize: "0.65rem" }}
         >
-          © {year} AGENTIC. {t.footer.rights}
+          © {year} VORVEX OÜ. {t.footer.rights}
         </p>
         <p
           className="text-xs"

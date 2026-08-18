@@ -129,10 +129,10 @@ export const translations: Record<Locale, T> = {
       ],
     },
     differentiator: {
-      badge: "Why AGENTIC",
+      badge: "Why VORVEX",
       title: "Not another chatbot that shrugs.",
       col1: "Generic chatbots",
-      col2: "AGENTIC",
+      col2: "VORVEX",
       items: [
         { bad: "Guesses when it doesn't know", good: "Says 'let me check' and follows up" },
         { bad: "One language, one script", good: "Any language your client writes in — automatically" },
@@ -238,10 +238,10 @@ export const translations: Record<Locale, T> = {
       ],
     },
     differentiator: {
-      badge: "Почему AGENTIC",
+      badge: "Почему VORVEX",
       title: "Не очередной бот, который пожимает плечами.",
       col1: "Обычные чат-боты",
-      col2: "AGENTIC",
+      col2: "VORVEX",
       items: [
         { bad: "Угадывает, когда не знает ответа", good: "Говорит «уточню» и возвращается с ответом" },
         { bad: "Один язык, один скрипт", good: "Любой язык клиента — автоматически" },
@@ -347,10 +347,10 @@ export const translations: Record<Locale, T> = {
       ],
     },
     differentiator: {
-      badge: "Miks AGENTIC",
+      badge: "Miks VORVEX",
       title: "Mitte veel üks vestlusrobot, kes kehitab õlgu.",
       col1: "Tavalised vestlusrobotid",
-      col2: "AGENTIC",
+      col2: "VORVEX",
       items: [
         { bad: "Arvab, kui ei tea vastust", good: "Ütleb 'vaatan järgi' ja vastab hiljem" },
         { bad: "Üks keel, üks skript", good: "Iga kliendi keel — automaatselt" },

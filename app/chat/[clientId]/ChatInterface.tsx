@@ -305,19 +305,33 @@ export function ChatInterface({
           </div>
 
           <button
-            onClick={clearChat}
-            title="New chat"
+            onClick={() => { window.location.href = '/#demos'; }}
+            title="Close chat"
             style={{
               background: "rgba(255,255,255,0.05)",
               border: "1px solid rgba(255,255,255,0.08)",
-              borderRadius: 8,
-              padding: "5px 10px",
+              borderRadius: "50%",
+              width: 36,
+              height: 36,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
               color: "#94A3B8",
-              fontSize: 11,
               cursor: "pointer",
+              flexShrink: 0,
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.12)";
+              (e.currentTarget as HTMLElement).style.color = "#F5F7FA";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)";
+              (e.currentTarget as HTMLElement).style.color = "#94A3B8";
             }}
           >
-            New chat
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
           </button>
         </header>
 
@@ -546,7 +560,7 @@ export function ChatInterface({
             </button>
           </form>
           <p className="text-center mt-2 text-xs" style={{ color: "rgba(148,163,184,0.5)" }}>
-            Demo bot — powered by AGENTIC
+            Demo bot — powered by VORVEX
           </p>
         </div>
       </div>

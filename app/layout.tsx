@@ -23,10 +23,13 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AGENTIC — AI Agents for Local Business",
+  title: "Vorvex — AI Agents for Local Business",
   description:
     "AI agents that know your business inside out — booking appointments, answering questions, and capturing leads in Estonian, Russian, and English. Never asleep, never clueless.",
   keywords: ["AI agent", "chatbot", "Estonia", "local business", "automation"],
+  icons: {
+    apple: "/vorvex-logo.jpg",
+  },
 };
 
 export default function RootLayout({

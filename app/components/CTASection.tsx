@@ -72,8 +72,8 @@ export function CTASection() {
           </div>
           <p className="text-sm" style={{ color: "#94A3B8" }}>
             {t.cta.emailPrefix}{" "}
-            <a href="mailto:hello@agentic.ee" style={{ color: "#4F8CFF" }}>
-              hello@agentic.ee
+            <a href="mailto:vorvex.tech@gmail.com" style={{ color: "#4F8CFF" }}>
+              vorvex.tech@gmail.com
             </a>
           </p>
         </motion.div>

@@ -46,14 +46,11 @@ export function Navbar() {
         {/* Logo */}
         <a
           href="/"
-          className="font-bold text-xl tracking-tight"
+          className="flex items-center gap-2 font-bold text-xl tracking-tight"
           style={{ fontFamily: "var(--font-space-grotesk)", color: "#F5F7FA" }}
         >
-          AGENTIC
-          <span
-            className="ml-1 inline-block w-1.5 h-1.5 rounded-full align-middle mb-0.5"
-            style={{ background: "#4F8CFF" }}
-          />
+          <img src="/logo32.png" alt="Vorvex" width={24} height={24} />
+          VORVEX
         </a>
 
         {/* Desktop nav */}

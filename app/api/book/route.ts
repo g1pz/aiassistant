@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
       bookingData.name     && `👤 *Имя:* ${bookingData.name}`,
       bookingData.contact  && `📱 *Контакт:* ${bookingData.contact}`,
     ].filter(Boolean).join('\n');
-    sendTelegram(token, chatId, `💅 *Новая запись — ${clientName}*\n\n${rows}\n\n_Demo bot via AGENTIC_`).catch(() => {});
+    sendTelegram(token, chatId, `💅 *Новая запись — ${clientName}*\n\n${rows}\n\n_Demo bot via VORVEX_`).catch(() => {});
   }
 
   return Response.json({ success: true, id });

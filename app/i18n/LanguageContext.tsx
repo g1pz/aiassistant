@@ -23,7 +23,7 @@ const LanguageContext = createContext<LanguageContextValue>({
 
 function detectLocale(): Locale {
   if (typeof window === "undefined") return "en";
-  const saved = localStorage.getItem("agentic-locale") as Locale | null;
+  const saved = localStorage.getItem("vorvex-locale") as Locale | null;
   if (saved && ["en", "ru", "et"].includes(saved)) return saved;
 
   const browserLang = navigator.language.toLowerCase();
@@ -41,7 +41,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   const setLocale = (l: Locale) => {
     setLocaleState(l);
-    localStorage.setItem("agentic-locale", l);
+    localStorage.setItem("vorvex-locale", l);
   };
 
   return (
