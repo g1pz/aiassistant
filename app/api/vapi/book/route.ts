@@ -24,6 +24,10 @@ interface VapiWebhookBody {
   message: VapiMessage;
 }
 
+function escapeMd(text: string): string {
+  return text.replace(/[_*[\]()~`>#+=|{}.!\\-]/g, '\\$&');
+}
+
 function parseArgs(raw: Record<string, string> | string): Record<string, string> {
   if (typeof raw === 'string') {
     try { return JSON.parse(raw); } catch { return {}; }
@@ -94,7 +98,7 @@ export async function POST(request: NextRequest) {
 
     sendTelegram(
       `🍽️ *Новая бронь (голосовой звонок) — Bella Cucina*\n\n` +
-      `👥 *Гостей:* ${guests}\n📅 *Дата:* ${date}\n⏰ *Время:* ${time}\n👤 *Имя:* ${name}\n📱 *Контакт:* ${contact ?? '—'}\n\n_via Vapi voice call_`
+      `👥 *Гостей:* ${escapeMd(guests)}\n📅 *Дата:* ${escapeMd(date ?? '')}\n⏰ *Время:* ${escapeMd(time)}\n👤 *Имя:* ${escapeMd(name)}\n📱 *Контакт:* ${escapeMd(contact ?? '—')}\n\n_via Vapi voice call_`
     );
 
     results.push({ toolCallId: call.id, result: confirmation });

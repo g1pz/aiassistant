@@ -9,6 +9,17 @@ const LANG_NAME: Record<Lang, string> = {
 };
 
 export async function GET(req: Request) {
+  // Vapi calls this server-to-server — require the shared webhook secret
+  const secret = process.env.VAPI_WEBHOOK_SECRET;
+  if (secret) {
+    const incoming =
+      new URL(req.url).searchParams.get('secret') ??
+      (req as Request & { headers: Headers }).headers?.get('x-vapi-secret') ?? '';
+    if (incoming !== secret) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+  }
+
   const { searchParams } = new URL(req.url);
   const clientId = searchParams.get('clientId') ?? '';
   const rawLang = searchParams.get('lang') ?? 'en';

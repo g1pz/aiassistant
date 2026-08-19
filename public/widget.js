@@ -121,4 +121,12 @@
   if (sessionStorage.getItem(SESSION_KEY)) {
     popup.style.display = 'flex';
   }
+
+  /* Auto-open after delay if user hasn't seen it yet this session */
+  var autoDelay = parseInt(script && script.getAttribute('data-auto-open') || '5000', 10);
+  if (!sessionStorage.getItem(SESSION_KEY)) {
+    setTimeout(function () {
+      if (popup.style.display !== 'flex') openPopup();
+    }, autoDelay);
+  }
 })();

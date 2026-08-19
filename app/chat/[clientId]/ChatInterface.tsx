@@ -10,6 +10,12 @@ import { BookingCard, type BookingData } from "./BookingCard";
 
 type Lang = "en" | "ru" | "et";
 
+function useInIframe() {
+  const [inIframe, setInIframe] = useState(false);
+  useEffect(() => { setInIframe(window.self !== window.top); }, []);
+  return inIframe;
+}
+
 interface Message {
   role: "user" | "assistant";
   content: string;
@@ -110,6 +116,7 @@ export function ChatInterface({
   vapiAssistantId,
 }: ChatInterfaceProps) {
   const effectivePhone = phone ?? salonPhone ?? '';
+  const inIframe = useInIframe();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
@@ -304,7 +311,7 @@ export function ChatInterface({
             </div>
           </div>
 
-          <button
+          {!inIframe && <button
             onClick={() => { window.location.href = '/#demos'; }}
             title="Close chat"
             style={{
@@ -332,7 +339,7 @@ export function ChatInterface({
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
               <path d="M18 6L6 18M6 6l12 12" />
             </svg>
-          </button>
+          </button>}
         </header>
 
         {/* Voice call banner — restaurant only */}

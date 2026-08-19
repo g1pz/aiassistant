@@ -12,13 +12,7 @@ export async function POST(request: NextRequest) {
   }
 
   const forwarded = request.headers.get('x-forwarded-for');
-  if (!forwarded) {
-    return new Response(JSON.stringify({ error: 'Unable to identify client.' }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
-  const ip = forwarded.split(',')[0].trim();
+  const ip = forwarded ? forwarded.split(',')[0].trim() : '127.0.0.1';
 
   const limitResult = await rateLimit('realestate', ip);
   if (!limitResult.success) {
