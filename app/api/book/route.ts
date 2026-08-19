@@ -44,7 +44,10 @@ function getIp(request: NextRequest): string {
 function validateField(value: unknown, maxLen: number): string | null {
   if (value === undefined || value === null) return null;
   if (typeof value !== 'string') return null;
-  return value.slice(0, maxLen).trim() || null;
+  const trimmed = value.slice(0, maxLen).trim();
+  if (!trimmed) return null;
+  // Prevent Google Sheets formula injection: prefix dangerous characters with apostrophe
+  return /^[=+\-@]/.test(trimmed) ? `'${trimmed}` : trimmed;
 }
 
 export async function POST(request: NextRequest) {

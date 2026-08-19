@@ -1,5 +1,7 @@
 import type { NextConfig } from "next";
 
+const isDev = process.env.NODE_ENV === "development";
+
 const securityHeaders = [
   { key: "X-Content-Type-Options",    value: "nosniff" },
   { key: "X-Frame-Options",           value: "SAMEORIGIN" },
@@ -9,7 +11,7 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' https://assets.calendly.com",
+      `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} https://assets.calendly.com`,
       "style-src 'self' 'unsafe-inline' https://assets.calendly.com",
       "connect-src 'self' https://api.anthropic.com wss://api.vapi.ai https://*.vapi.ai",
       "img-src 'self' data: blob: https://images.unsplash.com https://assets.calendly.com",

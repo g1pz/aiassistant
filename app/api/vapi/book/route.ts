@@ -1,9 +1,7 @@
 import { NextRequest } from 'next/server';
 import { randomUUID } from 'crypto';
-import { appendBooking } from '@/lib/googleSheets';
-
-// Vapi sends a POST when the assistant invokes the book_table tool.
-// We save to Google Sheets and return a confirmation string Vapi reads aloud.
+import { appendBooking, getBookings, hasConflict } from '@/lib/googleSheets';
+import { rateLimitBook } from '@/lib/rateLimit';
 
 interface VapiToolCall {
   id: string;
@@ -35,6 +33,11 @@ function parseArgs(raw: Record<string, string> | string): Record<string, string>
   return raw ?? {};
 }
 
+function getIp(request: NextRequest): string {
+  const forwarded = request.headers.get('x-forwarded-for');
+  return forwarded ? forwarded.split(',')[0].trim() : 'vapi';
+}
+
 async function sendTelegram(text: string) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
@@ -47,16 +50,33 @@ async function sendTelegram(text: string) {
 }
 
 export async function POST(request: NextRequest) {
-  // Optional webhook secret verification
+  // Fail-closed: secret MUST be configured and MUST match
   const secret = process.env.VAPI_WEBHOOK_SECRET;
-  if (secret) {
-    const incoming = request.headers.get('x-vapi-secret');
-    if (incoming !== secret) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+  if (!secret) {
+    return Response.json({ error: 'Webhook not configured' }, { status: 503 });
+  }
+  const incoming = request.headers.get('x-vapi-secret');
+  if (incoming !== secret) {
+    return Response.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const body: VapiWebhookBody = await request.json();
+  // Rate limit by IP (Vapi calls come from their servers — limits abuse via compromised secret)
+  const ip = getIp(request);
+  const limitResult = await rateLimitBook(ip);
+  if (!limitResult.success) {
+    return Response.json({ error: limitResult.error }, {
+      status: 429,
+      headers: { 'Retry-After': String(limitResult.retryAfter) },
+    });
+  }
+
+  let body: VapiWebhookBody;
+  try {
+    body = await request.json();
+  } catch {
+    return Response.json({ error: 'Invalid JSON' }, { status: 400 });
+  }
+
   const { message } = body;
 
   // Only handle tool-calls; acknowledge everything else silently
@@ -77,6 +97,19 @@ export async function POST(request: NextRequest) {
 
     if (!name || !date_iso || !time || !guests) {
       results.push({ toolCallId: call.id, result: 'Missing required booking information.' });
+      continue;
+    }
+
+    // Validate date_iso format
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date_iso)) {
+      results.push({ toolCallId: call.id, result: 'Invalid date format.' });
+      continue;
+    }
+
+    // Check slot availability before booking (prevent race condition from voice calls)
+    const existing = await getBookings('bella-cucina');
+    if (hasConflict(existing, date_iso, time, 90)) {
+      results.push({ toolCallId: call.id, result: `Sorry, that time is already taken. Please choose another time.` });
       continue;
     }
 
