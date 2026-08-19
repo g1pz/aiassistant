@@ -44,10 +44,11 @@ function getIp(request: NextRequest): string {
 function validateField(value: unknown, maxLen: number): string | null {
   if (value === undefined || value === null) return null;
   if (typeof value !== 'string') return null;
-  const trimmed = value.slice(0, maxLen).trim();
-  if (!trimmed) return null;
-  // Prevent Google Sheets formula injection: prefix dangerous characters with apostrophe
-  return /^[=+\-@]/.test(trimmed) ? `'${trimmed}` : trimmed;
+  // Strip HTML tags (<script>, <img>, etc.) — these fields are plain text only
+  const stripped = value.replace(/<[^>]*>/g, '').slice(0, maxLen).trim();
+  if (!stripped) return null;
+  // Prevent Google Sheets formula injection: prefix dangerous leading characters with apostrophe
+  return /^[=+\-@]/.test(stripped) ? `'${stripped}` : stripped;
 }
 
 export async function POST(request: NextRequest) {
