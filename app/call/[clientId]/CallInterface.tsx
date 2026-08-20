@@ -133,22 +133,10 @@ export function CallInterface({
         vapiRef.current = null;
       });
 
-      // Fetch server-side config: system prompt with today's date + localized greeting (no emojis)
-      const cfgRes = await fetch(`/api/vapi/session-config?clientId=${clientId}&lang=${lang}`);
-      const { systemPrompt, firstMessage } = cfgRes.ok ? await cfgRes.json() : {};
-
-      const vapiModel = process.env.NEXT_PUBLIC_VAPI_MODEL ?? 'claude-haiku-4-5-20251001';
-
+      // System prompt is built server-side via assistant-request webhook — never sent to browser
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (vapi as any).start(vapiAssistantId, {
-        ...(firstMessage ? { firstMessage } : {}),
-        ...(systemPrompt ? {
-          model: {
-            provider: 'anthropic',
-            model: vapiModel,
-            systemPrompt,
-          },
-        } : {}),
+      await (vapi as any).start(null, {
+        variableValues: { clientId, lang },
       });
     } catch (err) {
       console.error('[Vapi]', err);
@@ -357,19 +345,19 @@ export function CallInterface({
             onClick={startCall}
             style={{
               width: 72, height: 72, borderRadius: '50%',
-              background: `linear-gradient(135deg, ${accent}, ${accent2})`,
+              background: 'linear-gradient(135deg, #16a34a, #22c55e)',
               border: 'none', cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: `0 0 32px ${accent}60`,
+              boxShadow: '0 0 32px rgba(34,197,94,0.6)',
               transition: 'transform 0.15s, box-shadow 0.15s',
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = 'scale(1.08)';
-              e.currentTarget.style.boxShadow = `0 0 48px ${accent}80`;
+              e.currentTarget.style.boxShadow = '0 0 48px rgba(34,197,94,0.8)';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = 'scale(1)';
-              e.currentTarget.style.boxShadow = `0 0 32px ${accent}60`;
+              e.currentTarget.style.boxShadow = '0 0 32px rgba(34,197,94,0.6)';
             }}
           >
             <PhoneIcon />

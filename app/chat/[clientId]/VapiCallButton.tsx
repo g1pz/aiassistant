@@ -140,7 +140,7 @@ export function VapiCallButton({ assistantId, accent, accent2, lang = 'en' }: Va
             padding: '9px 18px', borderRadius: 9999,
             background: isConnecting
               ? 'rgba(217,119,6,0.35)'
-              : `linear-gradient(135deg,${accent},${accent2})`,
+              : 'linear-gradient(135deg,#16a34a,#22c55e)',
             border: 'none',
             color: '#fff', fontSize: 13, fontWeight: 600,
             cursor: isConnecting ? 'default' : 'pointer',

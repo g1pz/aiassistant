@@ -16,10 +16,10 @@
   var style = document.createElement('style');
   style.textContent = [
     '#vorvex-btn{position:fixed;bottom:24px;right:24px;width:56px;height:56px;border-radius:50%;',
-    'background:#0c1117;border:none;cursor:pointer;z-index:9999;',
-    'box-shadow:0 4px 20px rgba(79,140,255,0.35);display:flex;align-items:center;justify-content:center;',
+    'background:transparent;border:none;cursor:pointer;z-index:9999;',
+    'box-shadow:0 0 30px #c600ff;display:flex;align-items:center;justify-content:center;',
     'transition:transform 0.2s,box-shadow 0.2s;}',
-    '#vorvex-btn:hover{transform:scale(1.08);box-shadow:0 6px 28px rgba(79,140,255,0.5);}',
+    '#vorvex-btn:hover{transform:scale(1.08);box-shadow:0 0 30px #4F8CFF;}',
 
     '#vorvex-popup{position:fixed;bottom:92px;right:24px;width:380px;height:560px;z-index:9998;',
     'border-radius:20px;overflow:hidden;box-shadow:0 12px 48px rgba(0,0,0,0.55);',

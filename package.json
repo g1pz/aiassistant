@@ -12,6 +12,7 @@
     "@anthropic-ai/sdk": "^0.115.0",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.7.0",
+    "@supabase/supabase-js": "^2.109.0",
     "@types/three": "^0.185.3",
     "@vapi-ai/web": "^2.6.1",
     "@vercel/kv": "^3.0.0",

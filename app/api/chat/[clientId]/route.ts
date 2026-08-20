@@ -3,6 +3,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { rateLimit } from '@/lib/rateLimit';
 import { getClient } from '@/lib/clients/index';
 import { getBookings, buildAvailabilityBlock } from '@/lib/googleSheets';
+import { logClaudeUsage } from '@/lib/logUsage';
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 const MODEL = process.env.CLAUDE_MODEL || 'claude-haiku-4-5-20251001';
@@ -63,6 +64,13 @@ export async function POST(
               controller.enqueue(encoder.encode(chunk.delta.text));
             }
           }
+          const finalMsg = await stream.finalMessage();
+          console.log('[chat] stream done, usage:', finalMsg.usage);
+          logClaudeUsage(
+            clientId,
+            finalMsg.usage.input_tokens,
+            finalMsg.usage.output_tokens,
+          ).catch((e) => console.error('[chat] logUsage failed:', e));
           controller.close();
         } catch {
           controller.error(new Error('Stream error'));

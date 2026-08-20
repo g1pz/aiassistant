@@ -2,6 +2,11 @@ import { NextRequest } from 'next/server';
 import { randomUUID } from 'crypto';
 import { appendBooking, getBookings, hasConflict } from '@/lib/googleSheets';
 import { rateLimitBook } from '@/lib/rateLimit';
+import { logVapiUsage } from '@/lib/logUsage';
+import { getClient } from '@/lib/clients/index';
+
+type Lang = 'en' | 'ru' | 'et';
+const LANG_NAME: Record<Lang, string> = { en: 'English', ru: 'Russian', et: 'Estonian' };
 
 interface VapiToolCall {
   id: string;
@@ -14,8 +19,14 @@ interface VapiToolCall {
 
 interface VapiMessage {
   type: string;
-  call?: { id: string };
+  call?: {
+    id: string;
+    assistantOverrides?: { variableValues?: Record<string, string> };
+    metadata?: Record<string, string>;
+  };
   toolCallList?: VapiToolCall[];
+  durationSeconds?: number;
+  cost?: number;
 }
 
 interface VapiWebhookBody {
@@ -78,6 +89,54 @@ export async function POST(request: NextRequest) {
   }
 
   const { message } = body;
+
+  // Return full assistant config server-side — system prompt never goes through browser
+  if (message?.type === 'assistant-request') {
+    const vars = message.call?.assistantOverrides?.variableValues ?? message.call?.metadata ?? {};
+    const clientId = vars.clientId ?? 'unknown';
+    const rawLang = vars.lang ?? 'en';
+    const lang: Lang = rawLang === 'ru' ? 'ru' : rawLang === 'et' ? 'et' : 'en';
+
+    const client = getClient(clientId);
+    if (!client) return Response.json({ error: 'Client not found' }, { status: 404 });
+
+    const today = new Date();
+    const current_date = today.toLocaleDateString('en-GB', {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+    });
+    const systemPrompt =
+      `TODAY'S DATE: ${current_date}. Use this for ALL date references.\n` +
+      `MANDATORY LANGUAGE: You MUST speak and respond in ${LANG_NAME[lang]} for the ENTIRE conversation.\n\n` +
+      client.systemPrompt;
+
+    const raw = client.welcomeMessages?.[lang] ?? client.welcomeMessages?.['en'] ?? '';
+    const firstMessage = raw
+      .replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}]/gu, '')
+      .replace(/\s+/g, ' ').trim();
+
+    const vapiModel = process.env.NEXT_PUBLIC_VAPI_MODEL ?? 'claude-haiku-4-5-20251001';
+
+    return Response.json({
+      assistant: {
+        firstMessage,
+        model: {
+          provider: 'anthropic',
+          model: vapiModel,
+          messages: [{ role: 'system', content: systemPrompt }],
+        },
+      },
+    });
+  }
+
+  // Log Vapi call cost when call ends
+  if (message?.type === 'end-of-call-report') {
+    const clientId =
+      message.call?.assistantOverrides?.variableValues?.clientId ??
+      message.call?.metadata?.clientId ??
+      'unknown';
+    logVapiUsage(clientId, message.durationSeconds ?? 0, message.cost ?? 0).catch(() => {});
+    return Response.json({ received: true });
+  }
 
   // Only handle tool-calls; acknowledge everything else silently
   if (message?.type !== 'tool-calls') {

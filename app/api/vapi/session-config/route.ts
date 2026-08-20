@@ -16,16 +16,10 @@ function getIp(request: NextRequest): string {
 }
 
 export async function GET(request: NextRequest) {
-  // Fail-closed: secret MUST be configured and MUST match
-  const secret = process.env.VAPI_WEBHOOK_SECRET;
-  if (!secret) {
-    return Response.json({ error: 'Endpoint not configured' }, { status: 503 });
-  }
   const { searchParams } = new URL(request.url);
-  const incoming =
-    searchParams.get('secret') ??
-    request.headers.get('x-vapi-secret') ?? '';
-  if (incoming !== secret) {
+
+  const token = process.env.NEXT_PUBLIC_CONFIG_TOKEN;
+  if (token && searchParams.get('token') !== token) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
