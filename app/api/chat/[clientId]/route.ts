@@ -65,12 +65,11 @@ export async function POST(
             }
           }
           const finalMsg = await stream.finalMessage();
-          console.log('[chat] stream done, usage:', finalMsg.usage);
-          logClaudeUsage(
+          await logClaudeUsage(
             clientId,
             finalMsg.usage.input_tokens,
             finalMsg.usage.output_tokens,
-          ).catch((e) => console.error('[chat] logUsage failed:', e));
+          ).catch((e) => console.error('[logUsage]', e));
           controller.close();
         } catch {
           controller.error(new Error('Stream error'));
