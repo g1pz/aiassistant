@@ -56,8 +56,10 @@ const TEXT: Record<Lang, {
   },
 };
 
-function getBrowserLang(): Lang {
-  if (typeof navigator === 'undefined') return 'en';
+function getUserLang(): Lang {
+  if (typeof window === 'undefined') return 'en';
+  const saved = localStorage.getItem('vorvex-locale');
+  if (saved === 'ru' || saved === 'et' || saved === 'en') return saved;
   const l = navigator.language.toLowerCase().slice(0, 2);
   return l === 'ru' ? 'ru' : l === 'et' ? 'et' : 'en';
 }
@@ -106,7 +108,7 @@ export function CallInterface({
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [status]);
 
-  useEffect(() => { setLang(getBrowserLang()); }, []);
+  useEffect(() => { setLang(getUserLang()); }, []);
 
   useEffect(() => {
     return () => { vapiRef.current?.stop?.(); };
@@ -133,9 +135,14 @@ export function CallInterface({
         vapiRef.current = null;
       });
 
-      // System prompt is built server-side via assistant-request webhook — never sent to browser
+      // Fetch only the greeting — system prompt stays in Vapi Dashboard, never sent to browser
+      const cfgToken = process.env.NEXT_PUBLIC_CONFIG_TOKEN ?? '';
+      const cfgRes = await fetch(`/api/vapi/session-config?clientId=${clientId}&lang=${lang}&token=${cfgToken}`);
+      const { firstMessage } = cfgRes.ok ? await cfgRes.json() : {};
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (vapi as any).start(null, {
+      await (vapi as any).start(vapiAssistantId, {
+        ...(firstMessage ? { firstMessage } : {}),
         variableValues: { clientId, lang },
       });
     } catch (err) {

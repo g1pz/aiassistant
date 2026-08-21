@@ -36,8 +36,10 @@ const DEFAULT_PLACEHOLDER: Record<Lang, string> = {
   et: "Esitage küsimus või kirjutage päring…",
 };
 
-function getBrowserLang(): Lang {
-  if (typeof navigator === "undefined") return "en";
+function getUserLang(): Lang {
+  if (typeof window === "undefined") return "en";
+  const saved = localStorage.getItem("vorvex-locale");
+  if (saved === "ru" || saved === "et" || saved === "en") return saved;
   const l = navigator.language.toLowerCase().slice(0, 2);
   return (l === "ru" || l === "et") ? l : "en";
 }
@@ -128,7 +130,7 @@ export function ChatInterface({
   const bookedSlotsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
-    const lang = getBrowserLang();
+    const lang = getUserLang();
     setChatLang(lang);
     const welcome =
       welcomeMessages?.[lang] ??
@@ -263,7 +265,7 @@ export function ChatInterface({
   }
 
   function clearChat() {
-    const lang = getBrowserLang();
+    const lang = getUserLang();
     setChatLang(lang);
     const welcome = welcomeMessages?.[lang] ?? DEFAULT_WELCOME[lang];
     setMessages([{ role: "assistant", content: welcome }]);
