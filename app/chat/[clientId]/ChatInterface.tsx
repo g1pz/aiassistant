@@ -376,6 +376,7 @@ export function ChatInterface({
                 {vapiAssistantId && (
                   <VapiCallButton
                     assistantId={vapiAssistantId}
+                    clientId={clientId}
                     accent={accent}
                     accent2={accent2}
                     lang={chatLang}

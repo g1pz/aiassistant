@@ -141,9 +141,14 @@ export function CallInterface({
       const { firstMessage } = cfgRes.ok ? await cfgRes.json() : {};
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const currentDate = new Date().toLocaleDateString('en-GB', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+      });
+
       await (vapi as any).start(vapiAssistantId, {
         ...(firstMessage ? { firstMessage } : {}),
-        variableValues: { clientId, lang },
+        variableValues: { clientId, lang, currentDate },
+        model: { maxTokens: 1500 },
       });
     } catch (err) {
       console.error('[Vapi]', err);

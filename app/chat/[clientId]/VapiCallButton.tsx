@@ -42,12 +42,13 @@ const TEXT: Record<Lang, {
 
 interface VapiCallButtonProps {
   assistantId: string;
+  clientId: string;
   accent: string;
   accent2: string;
   lang?: Lang;
 }
 
-export function VapiCallButton({ assistantId, accent, accent2, lang = 'en' }: VapiCallButtonProps) {
+export function VapiCallButton({ assistantId, clientId, accent, accent2, lang = 'en' }: VapiCallButtonProps) {
   const [status, setStatus] = useState<CallStatus>('idle');
   const [error, setError] = useState<string | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -88,7 +89,19 @@ export function VapiCallButton({ assistantId, accent, accent2, lang = 'en' }: Va
         vapiRef.current = null;
       });
 
-      await vapi.start(assistantId);
+      const cfgToken = process.env.NEXT_PUBLIC_CONFIG_TOKEN ?? '';
+      const cfgRes = await fetch(`/api/vapi/session-config?clientId=${clientId}&lang=${lang}&token=${cfgToken}`);
+      const { firstMessage } = cfgRes.ok ? await cfgRes.json() : {};
+
+      const currentDate = new Date().toLocaleDateString('en-GB', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+      });
+
+      await vapi.start(assistantId, {
+        ...(firstMessage ? { firstMessage } : {}),
+        variableValues: { clientId, lang, currentDate },
+        model: { maxTokens: 1500 },
+      });
     } catch (err) {
       console.error('[Vapi] start error:', err);
       setStatus('idle');
