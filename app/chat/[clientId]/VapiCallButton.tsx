@@ -100,7 +100,6 @@ export function VapiCallButton({ assistantId, clientId, accent, accent2, lang = 
       await vapi.start(assistantId, {
         ...(firstMessage ? { firstMessage } : {}),
         variableValues: { clientId, lang, currentDate },
-        model: { maxTokens: 1500 },
       });
     } catch (err) {
       console.error('[Vapi] start error:', err);

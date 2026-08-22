@@ -256,6 +256,50 @@
       .about { padding: 60px 20px; }
       .cta-banner { padding: 50px 20px; }
     }
+
+    /* ── BACKGROUND TEST SECTIONS ── */
+    .bg-test {
+      padding: 80px 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 340px;
+      text-align: center;
+      gap: 12px;
+    }
+    .bg-label {
+      font-family: monospace;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      opacity: 0.45;
+      margin-bottom: 4px;
+    }
+    .bg-test h2 {
+      font-size: clamp(1.4rem, 3vw, 2.2rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+    .bg-test p {
+      font-family: Arial, sans-serif;
+      font-size: 15px;
+      max-width: 480px;
+      line-height: 1.6;
+      opacity: 0.7;
+    }
+    .divider-label {
+      background: #111;
+      color: #fff;
+      font-family: monospace;
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-align: center;
+      padding: 10px;
+      text-transform: uppercase;
+      opacity: 0.85;
+    }
   </style>
 </head>
 <body>
@@ -377,7 +421,140 @@
     <p style="margin-top:8px">© 2025 Kodu Kinnisvara. All rights reserved.</p>
   </footer>
 
-  <!-- AGENTIC WIDGET — вставь сюда свой домен -->
+  <!-- ══════════════════════════════════════════════════════
+       WIDGET BACKGROUND TEST SECTIONS
+       ══════════════════════════════════════════════════════ -->
+  <div class="divider-label">↓ Widget background test — scroll to see widget on each background</div>
+
+  <!-- 1. Pure White -->
+  <section class="bg-test" style="background:#ffffff; color:#111;">
+    <span class="bg-label">#ffffff — pure white</span>
+    <h2>Clean White Background</h2>
+    <p>Common for SaaS dashboards, documentation sites and minimalist landing pages.</p>
+  </section>
+
+  <!-- 2. Light Gray -->
+  <section class="bg-test" style="background:#f3f4f6; color:#1f2937;">
+    <span class="bg-label">#f3f4f6 — light gray</span>
+    <h2>Neutral Light Gray</h2>
+    <p>The most common background for corporate and e-commerce sites.</p>
+  </section>
+
+  <!-- 3. Warm Cream -->
+  <section class="bg-test" style="background:#fdf6ec; color:#3b2f1e;">
+    <span class="bg-label">#fdf6ec — warm cream</span>
+    <h2>Warm Cream / Beige</h2>
+    <p>Popular in food, hospitality and lifestyle brands.</p>
+  </section>
+
+  <!-- 4. Sky Blue Light -->
+  <section class="bg-test" style="background:#e0f2fe; color:#0c4a6e;">
+    <span class="bg-label">#e0f2fe — sky blue</span>
+    <h2>Light Blue Tint</h2>
+    <p>Often seen on health, tech and service business websites.</p>
+  </section>
+
+  <!-- 5. Mint / Green Light -->
+  <section class="bg-test" style="background:#d1fae5; color:#064e3b;">
+    <span class="bg-label">#d1fae5 — mint green</span>
+    <h2>Soft Mint Background</h2>
+    <p>Used in eco, wellness and financial product landing pages.</p>
+  </section>
+
+  <!-- 6. Lavender -->
+  <section class="bg-test" style="background:#ede9fe; color:#3b0764;">
+    <span class="bg-label">#ede9fe — lavender</span>
+    <h2>Soft Lavender</h2>
+    <p>Common in beauty, fashion and creative agency portfolios.</p>
+  </section>
+
+  <!-- 7. Coral / Salmon -->
+  <section class="bg-test" style="background:#fee2e2; color:#7f1d1d;">
+    <span class="bg-label">#fee2e2 — blush / coral</span>
+    <h2>Blush Pink Background</h2>
+    <p>Typical for beauty salons, gift shops and lifestyle blogs.</p>
+  </section>
+
+  <!-- 8. Deep Navy -->
+  <section class="bg-test" style="background:#0f172a; color:#e2e8f0;">
+    <span class="bg-label">#0f172a — deep navy</span>
+    <h2>Dark Navy Background</h2>
+    <p>Popular for tech startups, SaaS products and premium brands.</p>
+  </section>
+
+  <!-- 9. Charcoal -->
+  <section class="bg-test" style="background:#1c1c1e; color:#f5f5f7;">
+    <span class="bg-label">#1c1c1e — charcoal</span>
+    <h2>Charcoal Dark Mode</h2>
+    <p>Apple-style dark background used in modern product pages.</p>
+  </section>
+
+  <!-- 10. True Black -->
+  <section class="bg-test" style="background:#000000; color:#ffffff;">
+    <span class="bg-label">#000000 — true black</span>
+    <h2>Full Black</h2>
+    <p>Luxury brands, night mode interfaces, fashion and automotive sites.</p>
+  </section>
+
+  <!-- 11. Dark Purple -->
+  <section class="bg-test" style="background:#1e1b4b; color:#e0e7ff;">
+    <span class="bg-label">#1e1b4b — dark indigo</span>
+    <h2>Deep Purple / Indigo</h2>
+    <p>AI products, crypto platforms and futuristic brand identities.</p>
+  </section>
+
+  <!-- 12. Dark Green -->
+  <section class="bg-test" style="background:#052e16; color:#d1fae5;">
+    <span class="bg-label">#052e16 — forest dark</span>
+    <h2>Dark Forest Green</h2>
+    <p>Premium eco brands, outdoor products and nature-themed sites.</p>
+  </section>
+
+  <!-- 13. Gradient — Light -->
+  <section class="bg-test" style="background:linear-gradient(135deg,#e0e7ff 0%,#f0fdf4 100%); color:#1e3a5f;">
+    <span class="bg-label">gradient — light blue→mint</span>
+    <h2>Pastel Gradient</h2>
+    <p>Trendy SaaS, fintech and health-tech landing pages.</p>
+  </section>
+
+  <!-- 14. Gradient — Dark -->
+  <section class="bg-test" style="background:linear-gradient(135deg,#0f0c29 0%,#302b63 50%,#24243e 100%); color:#e0d7ff;">
+    <span class="bg-label">gradient — dark purple</span>
+    <h2>Dark Purple Gradient</h2>
+    <p>Gaming, AI tools, entertainment and premium digital products.</p>
+  </section>
+
+  <!-- 15. Gradient — Warm Sunset -->
+  <section class="bg-test" style="background:linear-gradient(135deg,#f97316 0%,#ec4899 100%); color:#fff;">
+    <span class="bg-label">gradient — sunset orange→pink</span>
+    <h2>Warm Sunset Gradient</h2>
+    <p>Creative agencies, social apps and bold marketing campaigns.</p>
+  </section>
+
+  <!-- 16. Image-like — Dark with texture feel -->
+  <section class="bg-test" style="background:radial-gradient(ellipse at 30% 40%,#1a3a2a 0%,#0a0a0a 70%); color:#a7f3d0;">
+    <span class="bg-label">radial gradient — dark teal</span>
+    <h2>Radial Dark Teal</h2>
+    <p>Boutique restaurants, spa resorts and luxury hospitality businesses.</p>
+  </section>
+
+  <!-- 17. Yellow / Amber -->
+  <section class="bg-test" style="background:#fef9c3; color:#713f12;">
+    <span class="bg-label">#fef9c3 — pale yellow</span>
+    <h2>Pale Yellow Background</h2>
+    <p>Food delivery, retail and energetic consumer brand websites.</p>
+  </section>
+
+  <!-- 18. Mid-tone gray (trickiest for widget visibility) -->
+  <section class="bg-test" style="background:#6b7280; color:#f9fafb;">
+    <span class="bg-label">#6b7280 — mid gray</span>
+    <h2>Mid-Tone Gray</h2>
+    <p>The hardest case — neither light nor dark. Tests widget shadow contrast.</p>
+  </section>
+
+  <div class="divider-label">↑ End of background test</div>
+
+  <!-- WIDGET -->
   <script
     src="http://localhost:3000/widget.js"
     data-client-id="kodu-kinnisvara"

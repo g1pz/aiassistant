@@ -148,7 +148,6 @@ export function CallInterface({
       await (vapi as any).start(vapiAssistantId, {
         ...(firstMessage ? { firstMessage } : {}),
         variableValues: { clientId, lang, currentDate },
-        model: { maxTokens: 1500 },
       });
     } catch (err) {
       console.error('[Vapi]', err);
